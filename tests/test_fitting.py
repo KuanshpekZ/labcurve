@@ -95,6 +95,26 @@ def test_as_dict_contains_plain_values() -> None:
     assert "outliers" not in summary
 
 
+def test_power_law_recovers_the_pendulum_relation(rng: np.random.Generator) -> None:
+    # Period of a simple pendulum: T = 2 * pi * sqrt(L / g) = (2 * pi / sqrt(g)) * L**0.5
+    gravity = 9.81
+    length = np.linspace(0.1, 2.0, 40)
+    period = 2.0 * math.pi * np.sqrt(length / gravity) + rng.normal(0.0, 0.005, length.size)
+    result = fit_curve(length, period, "power", yerr=np.full(length.size, 0.005))
+    scale, exponent = result.values
+    assert abs(exponent - 0.5) < 4.0 * result.errors[1]
+    assert abs(scale - 2.0 * math.pi / math.sqrt(gravity)) < 4.0 * result.errors[0]
+    assert (2.0 * math.pi / scale) ** 2 == pytest.approx(gravity, rel=0.01)
+    assert result.r_squared > 0.999
+
+
+@pytest.mark.parametrize("smallest", [0.0, -1.5])
+def test_power_law_rejects_non_positive_x(smallest: float) -> None:
+    x = np.array([smallest, 1.0, 2.0, 3.0])
+    with pytest.raises(DataError, match=r"only defined for x > 0.*smallest x is"):
+        fit_curve(x, np.array([1.0, 2.0, 3.0, 4.0]), "power")
+
+
 # --- outlier rejection -------------------------------------------------------
 
 

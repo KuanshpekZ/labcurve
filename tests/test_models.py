@@ -15,7 +15,7 @@ def test_registry_is_consistent() -> None:
 
 
 def test_unknown_model_lists_the_alternatives() -> None:
-    with pytest.raises(DataError, match=r"unknown model 'cubic'.*exponential, linear"):
+    with pytest.raises(DataError, match=r"unknown model 'cubic'.*exponential, linear, power"):
         get_model("cubic")
 
 
@@ -67,3 +67,32 @@ def test_exponential_guess_survives_repeated_first_x() -> None:
     x = np.array([0.0, 0.0, 1.0, 2.0, 3.0])
     y = np.array([10.0, 1.0, 1.0, 1.0, 1.0])
     assert get_model("exponential").initial_guess(x, y) == pytest.approx((9.0, 1.0, 1.0))
+
+
+def test_power_values() -> None:
+    x = np.array([1.0, 4.0, 9.0])
+    np.testing.assert_allclose(get_model("power").function(x, 2.0, 0.5), [2.0, 4.0, 6.0])
+
+
+@pytest.mark.parametrize("scale", [3.0, -3.0])
+def test_power_guess_is_exact_for_noise_free_data(scale: float) -> None:
+    x = np.linspace(0.5, 20.0, 15)
+    assert get_model("power").initial_guess(x, scale * x**1.7) == pytest.approx((scale, 1.7))
+
+
+@pytest.mark.parametrize(
+    ("x", "y"),
+    [
+        ([1.0, 2.0, 3.0], [1.0, -2.0, 3.0]),  # y changes sign
+        ([0.0, 1.0, 2.0], [1.0, 2.0, 3.0]),  # x is not strictly positive
+        ([2.0, 2.0, 2.0], [1.0, 2.0, 3.0]),  # no spread in x
+    ],
+)
+def test_power_guess_falls_back_when_logarithms_are_impossible(
+    x: list[float], y: list[float]
+) -> None:
+    assert get_model("power").initial_guess(np.array(x), np.array(y)) == (1.0, 1.0)
+
+
+def test_only_the_power_model_restricts_x() -> None:
+    assert [name for name, model in MODELS.items() if model.requires_positive_x] == ["power"]

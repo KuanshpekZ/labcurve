@@ -29,6 +29,8 @@ class Model:
     parameters: tuple[str, ...]
     function: Callable[..., FloatArray]
     initial_guess: Callable[[FloatArray, FloatArray], tuple[float, ...]]
+    #: Whether the function is only defined for strictly positive ``x``.
+    requires_positive_x: bool = False
 
 
 def linear(x: FloatArray, a: float, b: float) -> FloatArray:
@@ -67,6 +69,20 @@ def _guess_exponential(x: FloatArray, y: FloatArray) -> tuple[float, ...]:
     return amplitude, tau, offset
 
 
+def power(x: FloatArray, a: float, b: float) -> FloatArray:
+    """Evaluate the power law ``a * x**b`` for positive ``x``."""
+    return a * np.power(x, b)
+
+
+def _guess_power(x: FloatArray, y: FloatArray) -> tuple[float, ...]:
+    # A power law is a straight line in log-log coordinates.
+    same_sign = bool(np.all(y > 0) or np.all(y < 0))
+    if not same_sign or np.any(x <= 0) or np.ptp(x) == 0.0:
+        return 1.0, 1.0
+    exponent, log_scale = np.polyfit(np.log(x), np.log(np.abs(y)), 1)
+    return float(np.sign(y[0]) * np.exp(log_scale)), float(exponent)
+
+
 MODELS: dict[str, Model] = {
     model.name: model
     for model in (
@@ -85,6 +101,15 @@ MODELS: dict[str, Model] = {
             parameters=("a", "tau", "c"),
             function=exponential,
             initial_guess=_guess_exponential,
+        ),
+        Model(
+            name="power",
+            formula="y = a * x^b",
+            description="Power law, e.g. pendulum period or scaling relations (needs x > 0).",
+            parameters=("a", "b"),
+            function=power,
+            initial_guess=_guess_power,
+            requires_positive_x=True,
         ),
     )
 }
