@@ -42,6 +42,9 @@ dev = [
     "twine>=6.1",
 ]
 
+[project.scripts]
+labcurve = "labcurve.cli:main"
+
 [project.urls]
 Homepage = "https://github.com/KuanshpekZ/labcurve"
 Issues = "https://github.com/KuanshpekZ/labcurve/issues"
