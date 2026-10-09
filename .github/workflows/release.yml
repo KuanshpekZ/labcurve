@@ -1,0 +1,83 @@
+# Continuous delivery: pushing a version tag (for example v0.1.0) tests and
+# builds the package and publishes it as a GitHub release, with the matching
+# section of CHANGELOG.md as release notes. No manual step is involved.
+name: Release
+
+on:
+  push:
+    tags: ["v[0-9]+.[0-9]+.[0-9]+"]
+
+permissions:
+  contents: read
+
+env:
+  FORCE_COLOR: "1"
+  PIP_DISABLE_PIP_VERSION_CHECK: "1"
+
+jobs:
+  build:
+    name: Verify and build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+
+      - name: Install the package with development tools
+        run: python -m pip install -e ".[dev]"
+
+      - name: Check that the tag matches the package version
+        run: |
+          version="$(python -c 'import labcurve; print(labcurve.__version__)')"
+          if [ "v${version}" != "${GITHUB_REF_NAME}" ]; then
+            echo "::error::Tag ${GITHUB_REF_NAME} does not match package version ${version}."
+            exit 1
+          fi
+
+      - name: Run the quality checks
+        run: |
+          ruff format --check .
+          ruff check .
+          mypy
+          python -m pytest --cov
+
+      - name: Build the source distribution and the wheel
+        run: |
+          python -m build
+          python -m twine check --strict dist/*
+
+      - name: Extract the release notes from the changelog
+        run: |
+          python tools/release_notes.py "${GITHUB_REF_NAME#v}" > release-notes.md
+          cat release-notes.md
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: release-files
+          path: |
+            dist/
+            release-notes.md
+          if-no-files-found: error
+
+  publish:
+    name: Publish the GitHub release
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write  # required to create a release
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          name: release-files
+
+      - name: Create the release and attach the package
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          gh release create "${GITHUB_REF_NAME}" dist/* \
+            --title "labcurve ${GITHUB_REF_NAME}" \
+            --notes-file release-notes.md \
+            --verify-tag
