@@ -1,4 +1,13 @@
-"""labcurve: clean, summarise, fit and plot experimental measurements."""
+"""labcurve: clean, summarise, fit and plot experimental measurements.
+
+Typical use from Python::
+
+    from labcurve import load_measurements, clean_measurements, fit_curve
+
+    raw = load_measurements("cooling.csv", x="time_s", y="temp_c")
+    data, report = clean_measurements(raw, x="time_s", y="temp_c")
+    fit = fit_curve(data["time_s"], data["temp_c"], model="exponential")
+"""
 
 from labcurve.cleaning import CleaningReport, clean_measurements
 from labcurve.errors import DataError, FitError, LabcurveError
