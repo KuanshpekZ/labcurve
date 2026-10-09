@@ -272,7 +272,7 @@ References:
 | Linting, formatting | **Ruff**                             | flake8 + Black + isort          | One fast tool replaces three, with a single configuration section; it also checks docstrings.                                                                                                                                           |
 | Type checking       | **mypy** (strict)                    | Pyright                         | Finds mistakes such as passing a column name where an array is expected, or forgetting that a value may be `None`, before the code runs.                                                                                                                           |
 | Version control     | **Git** on **GitHub**                | GitLab, Bitbucket               | De-facto standard; GitHub combines hosting, issues, pull-request review, releases and CI in one place and is where most research software is published.                                                                                |
-| CI/CD               | **GitHub Actions**                   | GitLab CI, Jenkins              | Integrated with the repository, free for public projects, with hosted Linux and Windows runners. Jenkins would require running and maintaining a server.                                                                               |
+| CI/CD               | **GitHub Actions**                   | GitLab CI, Jenkins              | Integrated with the repository, free for public projects, with hosted Linux, Windows and macOS runners. Jenkins would require running and maintaining a server.                                                                               |
 | Licence             | **MIT**                              | GPL-3.0, Apache-2.0             | Short and permissive, so others can reuse the code in any project; compatible with the BSD-style licences of NumPy, pandas, SciPy and Matplotlib.                                                                                       |
 
 No web framework, database or compiled extension is used: the problem does not
@@ -333,7 +333,7 @@ Details, including the local commands to run before pushing, are in
 ```mermaid
 flowchart LR
     push(["push / pull request"]) --> lint["Lint and type-check<br/>ruff, mypy"]
-    push --> test["Tests with coverage<br/>Python 3.11–3.14, Linux and Windows"]
+    push --> test["Tests with coverage<br/>Python 3.11–3.14,<br/>Linux, Windows and macOS"]
     push --> oldest["Tests with the oldest<br/>supported dependencies"]
     lint --> build["Build the package,<br/>install the wheel, run it"]
     test --> build
@@ -349,7 +349,7 @@ runs on every push to `main` and on every pull request:
 | Job                     | What it checks                                                                                           |
 |-------------------------|----------------------------------------------------------------------------------------------------------|
 | `lint`                  | formatting (`ruff format --check`), lint rules including docstrings (`ruff check`), static types (`mypy`) |
-| `test`                  | the test suite on Python 3.11, 3.12, 3.13 and 3.14 on Linux and on Windows; fails below 90 % coverage     |
+| `test`                  | the test suite on Python 3.11 to 3.14 on Linux, and on Windows and macOS; fails below 90 % coverage       |
 | `oldest-dependencies`   | the test suite with the minimum library versions declared in `pyproject.toml`                            |
 | `build`                 | builds the wheel and source archive, installs the wheel in a clean environment and runs the example      |
 
