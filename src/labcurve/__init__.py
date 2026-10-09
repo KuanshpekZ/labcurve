@@ -5,6 +5,7 @@ from labcurve.errors import DataError, FitError, LabcurveError
 from labcurve.fitting import FitResult, fit_curve, flag_outliers
 from labcurve.io import load_measurements
 from labcurve.models import MODELS, Model, get_model
+from labcurve.plotting import plot_fit, save_figure
 from labcurve.stats import Summary, summarize
 
 __version__ = "0.1.0"
@@ -24,5 +25,7 @@ __all__ = [
     "flag_outliers",
     "get_model",
     "load_measurements",
+    "plot_fit",
+    "save_figure",
     "summarize",
 ]
