@@ -1,0 +1,4 @@
+# Store text with LF line endings on every platform, so that checksums of the
+# example data are identical on Linux, macOS and Windows.
+* text=auto eol=lf
+*.png binary
