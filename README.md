@@ -62,6 +62,7 @@ Available models (`labcurve models`):
 |---------------|-----------------------------|-------------------------------------------------|
 | `linear`      | `y = a * x + b`             | calibration curves, Hooke's law, Ohm's law      |
 | `exponential` | `y = a * exp(-x / tau) + c` | cooling, capacitor discharge, radioactive decay |
+| `power`       | `y = a * x^b`               | pendulum period, scaling laws (requires x > 0)  |
 
 ## Installation
 
@@ -397,7 +398,7 @@ repeatable.
 ## Limitations and roadmap
 
 - Only uncertainties in `y` are taken into account, not in `x`.
-- Two models are built in. A model is a small data class in
+- Three models are built in. A model is a small data class in
   `src/labcurve/models.py`, so adding one takes a function, a starting-value
   rule and tests.
 - Input is limited to delimited text files.

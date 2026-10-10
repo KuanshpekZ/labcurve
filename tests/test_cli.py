@@ -100,6 +100,7 @@ def test_models_command_lists_every_model(capsys: pytest.CaptureFixture[str]) ->
     output = capsys.readouterr().out
     assert "linear" in output and "y = a * x + b" in output
     assert "exponential" in output
+    assert "power" in output and "y = a * x^b" in output
 
 
 @pytest.mark.parametrize(
@@ -188,3 +189,13 @@ def test_dunder_main_delegates_to_the_cli(
         runpy.run_module("labcurve", run_name="__main__")
     assert raised.value.code == 0
     assert "linear" in capsys.readouterr().out
+
+
+def test_power_model_reports_unsuitable_data(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    source = tmp_path / "data.csv"
+    source.write_text("x,y\n0,0\n1,1\n2,4\n3,9\n", encoding="utf-8")
+    code = main(["analyze", str(source), "-x", "x", "-y", "y", "-m", "power", "-o", str(tmp_path)])
+    assert code == 1
+    assert "only defined for x > 0" in capsys.readouterr().err

@@ -22,6 +22,8 @@ First public release.
   for the mean.
 - `fit_curve`: weighted non-linear least-squares fit of the `linear` and
   `exponential` models with parameter uncertainties, R², RMSE and reduced χ².
+- `power` model (`y = a * x^b`) for power laws such as the period of a
+  pendulum; data with non-positive `x` are rejected with a clear message.
 - Optional iterative outlier rejection based on the modified z-score.
 - `plot_fit`: figure of the data, the fitted curve and the residuals.
 - `labcurve analyze` and `labcurve models` commands; the analysis writes a

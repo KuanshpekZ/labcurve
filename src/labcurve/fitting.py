@@ -141,6 +141,11 @@ def _validate(
         raise DataError(f"x and y must have the same length, got {xs.size} and {ys.size}")
     if not (np.all(np.isfinite(xs)) and np.all(np.isfinite(ys))):
         raise DataError("x and y must be finite; clean the data first")
+    if model.requires_positive_x and np.any(xs <= 0):
+        raise DataError(
+            f"model {model.name!r} is only defined for x > 0, "
+            f"but the smallest x is {float(xs.min()):g}"
+        )
 
     sigma: FloatArray | None = None
     if yerr is not None:
