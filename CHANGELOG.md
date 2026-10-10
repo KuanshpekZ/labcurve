@@ -32,7 +32,7 @@ First public release.
 - Synthetic, reproducible example data set (`examples/cooling.csv`).
 - Test suite with 100 % line and branch coverage.
 - Continuous integration (formatting, linting, type-checking, tests on
-  Python 3.11 to 3.14 on Linux and Windows, oldest supported dependencies,
+  Python 3.11 to 3.14 on Linux, Windows and macOS, oldest supported dependencies,
   package build) and automated GitHub releases from version tags.
 
 [Unreleased]: https://github.com/KuanshpekZ/labcurve/compare/v0.1.0...HEAD
